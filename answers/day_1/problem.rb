@@ -1,5 +1,3 @@
-require 'active_support/all'
-
 class Problem
   def initialize
     @input_path = File.join(File.dirname(__FILE__), 'input')
