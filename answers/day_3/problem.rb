@@ -4,7 +4,6 @@ class Problem
   end
 
   def answer_part_1
-    # require 'debug'; debugger
     File.readlines(@input_path).map { |line| line.chomp }.flat_map { |rucksack| Problem.common_item_types(rucksack) }.map { |item| Problem.item_priority[item] }.sum
   end
 
