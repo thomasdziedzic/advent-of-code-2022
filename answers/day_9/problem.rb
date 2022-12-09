@@ -8,7 +8,7 @@ class Problem
   end
 
   def answer_part_1
-    rope = Rope.new
+    rope = Rope.new(2)
     @moves.each do |move|
       rope.perform_move(move)
     end
@@ -16,6 +16,11 @@ class Problem
   end
 
   def answer_part_2
+    rope = Rope.new(10)
+    @moves.each do |move|
+      rope.perform_move(move)
+    end
+    rope.number_of_unique_visited_positions_by_tail
   end
 
   Move = Struct.new(:direction, :steps)
@@ -85,17 +90,20 @@ class Problem
   end
 
   class Rope
-    def initialize
-      @head = Knot.new
-      @tail = Knot.new
-      @tail_trace = [@tail.to_a]
+    def initialize(number_of_knots)
+      @knots = Array.new(number_of_knots) { Knot.new }
+      @tail_trace = [@knots.last.to_a]
     end
 
     def perform_move(move)
       move.steps.times do
-        @head.move_a_step_in_direction(move.direction)
-        @tail.move_closer_to(@head)
-        @tail_trace << @tail.to_a
+        @knots.first.move_a_step_in_direction(move.direction)
+
+        @knots.each_cons(2) do |head, tail|
+          tail.move_closer_to(head)
+        end
+
+        @tail_trace << @knots.last.to_a
       end
     end
 
