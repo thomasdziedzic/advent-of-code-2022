@@ -30,10 +30,10 @@ class Problem
   def answer_part_2
     zone = Zone.new(@sensors)
     @search_range.each do |y|
-      if y % 1_000 == 0
-        puts y
-        puts Time.current
-      end
+      # if y % 10_000 == 0
+      #   puts y
+      #   puts Time.current
+      # end
 
       x = zone.position_unaccounted_for(y, @search_range)
       if x
@@ -116,7 +116,7 @@ class Problem
         merged_ranges << (min..max)
       end
 
-      positions_covered_at_y = merged_ranges.map(&:count).sum
+      positions_covered_at_y = merged_ranges.map { |range| (range.end - range.begin) + 1 }.sum
       overlapping_beacon_positions_at_y = beacon_positions_at_y.filter { |beacon_position_at_y| merged_ranges.any? { |merged_range| merged_range.include?(beacon_position_at_y) } }.count
       overlapping_sensor_positions_at_y = sensor_positions_at_y.filter { |sensor_position_at_y| merged_ranges.any? { |merged_range| merged_range.include?(sensor_position_at_y) } }.count
       positions_covered_at_y - overlapping_beacon_positions_at_y - overlapping_sensor_positions_at_y
@@ -181,8 +181,8 @@ class Problem
         (truncated_begin..truncated_end)
       end
 
-      positions_covered_at_y = truncated_ranges.map(&:count).sum
-      if positions_covered_at_y < search_range.count
+      positions_covered_at_y = truncated_ranges.map { |range| (range.end - range.begin) + 1 }.sum
+      if positions_covered_at_y < ((search_range.end - search_range.begin) + 1)
         if truncated_ranges.count == 1
           return 0 if truncated_ranges.first.begin > 0
           return search_range.end if truncated_ranges.first.end < search_range.end
