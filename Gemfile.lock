@@ -11,8 +11,15 @@ GEM
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     minitest (5.16.3)
+    pairing_heap (1.0.0)
     power_assert (2.0.2)
+    rexml (3.2.5)
+    rgl (0.5.9)
+      pairing_heap (>= 0.3.0)
+      rexml (~> 3.2, >= 3.2.4)
+      stream (~> 0.5.3)
     ruby-prof (1.4.3)
+    stream (0.5.5)
     test-unit (3.5.5)
       power_assert
     tzinfo (2.0.5)
@@ -24,6 +31,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   debug
+  rgl
   ruby-prof
   test-unit
 

@@ -6,3 +6,5 @@ gem 'activesupport'
 gem 'debug'
 gem 'ruby-prof'
 gem 'test-unit'
+
+gem 'rgl'

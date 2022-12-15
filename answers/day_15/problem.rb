@@ -1,3 +1,6 @@
+require 'rgl/adjacency'
+require 'rgl/transitivity'
+
 class Problem
   def initialize(input_filename)
     input_path = File.join(File.dirname(__FILE__), input_filename)
@@ -57,7 +60,8 @@ class Problem
     end
 
     def number_of_positions_that_cannot_contain_beacon(y)
-      positions_covered_at_y = Set.new
+      ranges_covered_at_y = []
+      graph = RGL::AdjacencyGraph.new
       beacon_positions_at_y = Set.new
       sensor_positions_at_y = Set.new
 
@@ -69,12 +73,38 @@ class Problem
         distance_to_y = (sensor.sensor_position.y - y).abs
         distance_left = distance - distance_to_y
         if distance_left >= 0
-          positions_covered_at_y_by_sensor = Set.new(((sensor.sensor_position.x - distance_left)..(sensor.sensor_position.x + distance_left)).to_a)
-          positions_covered_at_y.merge(positions_covered_at_y_by_sensor)
+          graph.add_vertex(ranges_covered_at_y.size)
+
+          range_covered_at_y_by_sensor = (sensor.sensor_position.x - distance_left)..(sensor.sensor_position.x + distance_left)
+          ranges_covered_at_y.each.with_index do |range_covered_at_y, range_covered_at_y_index|
+            if range_covered_at_y.overlaps?(range_covered_at_y_by_sensor)
+              graph.add_edge(range_covered_at_y_index, ranges_covered_at_y.size)
+            end
+          end
+          ranges_covered_at_y << range_covered_at_y_by_sensor
         end
       end
 
-      positions_covered_at_y.count - beacon_positions_at_y.count - sensor_positions_at_y.count
+      merged_ranges = []
+
+      graph.each_connected_component do |connected_component|
+        min = nil
+        max = nil
+
+        connected_component.map do |index|
+          range = ranges_covered_at_y[index]
+
+          min = [min, range.begin].compact.min
+          max = [max, range.end].compact.max
+        end
+
+        merged_ranges << (min..max)
+      end
+
+      positions_covered_at_y = merged_ranges.map(&:count).sum
+      overlapping_beacon_positions_at_y = beacon_positions_at_y.filter { |beacon_position_at_y| merged_ranges.any? { |merged_range| merged_range.include?(beacon_position_at_y) } }.count
+      overlapping_sensor_positions_at_y = sensor_positions_at_y.filter { |sensor_position_at_y| merged_ranges.any? { |merged_range| merged_range.include?(sensor_position_at_y) } }.count
+      positions_covered_at_y - overlapping_beacon_positions_at_y - overlapping_sensor_positions_at_y
     end
   end
 end
