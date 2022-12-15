@@ -4,6 +4,7 @@ if ARGV.length == 0
 end
 
 require 'active_support/all'
+require 'debug'
 
 day = ARGV.first
 input_filename = ARGV.second || 'input'
