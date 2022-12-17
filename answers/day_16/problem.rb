@@ -30,7 +30,7 @@ module RGL
 
       other_candidate_locations = candidate_locations - Set[current_vertex]
 
-      max_profits_if_sold_to_current_location = if candidate_locations.include?(current_vertex)
+      max_profits = if candidate_locations.include?(current_vertex) && profits_by_vertex[current_vertex].nonzero?
         # the current location has value in potentially selling to
         potential_profits_for_current_location = (time_left - time_to_sell) * profits_by_vertex[current_vertex]
 
@@ -48,26 +48,24 @@ module RGL
           )
         end.max || current_profit + potential_profits_for_current_location
       else
-        current_profit
+        other_candidate_locations.map do |candidate_location|
+          time_bound_traveling_salesman_with_optional_selling_and_adjusting_profits_helper(
+            candidate_locations,
+            seen_location_profits,
+            current_profit,
+            time_left - shortest_paths[current_vertex][candidate_location],
+            time_to_sell,
+            time_to_travel_between_adjacent_locations,
+            candidate_location,
+            profits_by_vertex,
+            shortest_paths
+          )
+        end.max || current_profit
       end
-
-      max_profits_if_not_sold_to_current_location = other_candidate_locations.map do |candidate_location|
-        time_bound_traveling_salesman_with_optional_selling_and_adjusting_profits_helper(
-          candidate_locations,
-          seen_location_profits,
-          current_profit,
-          time_left - shortest_paths[current_vertex][candidate_location],
-          time_to_sell,
-          time_to_travel_between_adjacent_locations,
-          candidate_location,
-          profits_by_vertex,
-          shortest_paths
-        )
-      end.max || current_profit
 
       seen_location_profits[current_vertex] = old_seen_location_profit
 
-      [max_profits_if_sold_to_current_location, max_profits_if_not_sold_to_current_location].max
+      max_profits
     end
   end
 end
