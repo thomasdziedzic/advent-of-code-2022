@@ -8,3 +8,4 @@ gem 'ruby-prof'
 gem 'test-unit'
 
 gem 'rgl'
+gem 'algorithms'
