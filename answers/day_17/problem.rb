@@ -27,7 +27,7 @@ class Problem
     attr_reader :highest_rock
 
     def initialize(gases)
-      @chamber = []
+      @chamber = Chamber.new
       @highest_rock = -1
       @rocks = [
         HorizontalRock.new,
@@ -52,19 +52,19 @@ class Problem
         case gas
         when '<' # move left
           rock.move_left
-          rock.move_right if violation?(rock)
+          rock.move_right if @chamber.violation?(rock)
         when '>' # move right
           rock.move_right
-          rock.move_left if violation?(rock)
+          rock.move_left if @chamber.violation?(rock)
         else
           raise "unknown gas #{gas}"
         end
         @next_gas = (@next_gas + 1) % @num_gases
 
         rock.move_down
-        if violation?(rock)
+        if @chamber.violation?(rock)
           rock.move_up
-          settle(rock)
+          @chamber.settle(rock)
           @highest_rock = [@highest_rock, rock.topmost_y].max
           break
         end
@@ -72,18 +72,38 @@ class Problem
 
       @next_rock = (@next_rock + 1) % @num_rocks
     end
+  end
 
-    private
+  class Chamber
+    attr_reader :floor
 
-    def violation?(rock)
-      rock.leftmost_x < 0 || rock.rightmost_x > 6 || rock.bottommost_y < 0 || rock.segments.any? { |segment| @chamber.dig(segment.y, segment.x) == '#' }
+    def initialize
+      @floor = -1
+      @chamber = []
     end
 
     def settle(rock)
       rock.segments.each do |segment|
-        @chamber[segment.y] ||= ['.'] * 7
-        @chamber[segment.y][segment.x] = '#'
+        @chamber[get_relative_y(segment.y)] ||= ['.'] * 7
+        @chamber[get_relative_y(segment.y)][segment.x] = '#'
       end
+
+      new_floor = (rock.bottommost_y..rock.topmost_y).filter_map do |y|
+        y if @chamber[get_relative_y(y)].all? { |c| c == '#' }
+      end.max
+
+      if new_floor && new_floor > @floor
+        @chamber = @chamber.drop(new_floor - @floor)
+        @floor = new_floor
+      end
+    end
+
+    def violation?(rock)
+      rock.leftmost_x < 0 || rock.rightmost_x > 6 || rock.bottommost_y <= @floor || rock.segments.any? { |segment| @chamber.dig(get_relative_y(segment.y), segment.x) == '#' }
+    end
+
+    def get_relative_y(absolute_y)
+      absolute_y - (@floor + 1)
     end
   end
 
