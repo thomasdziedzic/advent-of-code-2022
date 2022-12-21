@@ -76,7 +76,7 @@ class Problem
     private
 
     def violation?(rock)
-      rock.leftmost_x < 0 || rock.rightmost_x > 6 || rock.bottommost_y < 0 || rock.segments.any? { |segment| @chamber[segment.y] && @chamber[segment.y][segment.x] == '#' }
+      rock.leftmost_x < 0 || rock.rightmost_x > 6 || rock.bottommost_y < 0 || rock.segments.any? { |segment| @chamber.dig(segment.y, segment.x) == '#' }
     end
 
     def settle(rock)
